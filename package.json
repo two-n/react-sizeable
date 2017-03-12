@@ -1,6 +1,6 @@
 {
   "name": "react-sizeable",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "main": "./dist/index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   "author": "Paul Dechov (paul@two-n.com)",
   "license": "MIT",
   "dependencies": {
-    "css-element-queries": "^0.3.2",
+    "d3-selection": "1",
     "react": "15",
     "react-dom": "15"
   },

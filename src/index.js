@@ -1,51 +1,64 @@
 import React, { Component, Children, cloneElement, PropTypes } from 'react'
-import ReactDOM from 'react-dom'
-import ResizeSensor from 'css-element-queries/src/ResizeSensor'
+import { findDOMNode } from 'react-dom'
+import { select } from "d3-selection"
 
 class Sizeable extends Component {
   constructor(props) {
     super(props)
     this.state = { size: null }
-    this.setSize = this.setSize.bind(this)
   }
+
   setSize() {
     const { width, height } = this.props,
-          node = ReactDOM.findDOMNode(this)
+          node = findDOMNode(this)
     this.setState({
       size: [
-        typeof width === 'function' ? width(node) : width ? node.offsetWidth : null,
-        typeof height === 'function' ? height(node) : height ? node.offsetHeight : null,
+        typeof width === 'function' ? width(node) :
+          typeof width === 'number' ? width :
+          width ? node.parentNode.offsetWidth : null,
+        typeof height === 'function' ? height(node) :
+          typeof height === 'number' ? height :
+          height ? node.parentNode.offsetHeight : null,
       ]
     })
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    return (
+      this.props !== nextProps ||
+      this.state.size == null || nextState.size == null ||
+      this.state.size[0] !== nextState.size[0] ||
+      this.state.size[1] !== nextState.size[1]
+    )
+  }
+
   componentDidMount() {
     this.setSize()
-    ResizeSensor(ReactDOM.findDOMNode(this), this.setSize)
+    select(window).on(`resize.${this.ns = Math.random()}`, this.setSize.bind(this))
   }
   componentWillUnmount() {
-    ResizeSensor.detach(ReactDOM.findDOMNode(this), this.setSize)
+    select(window).on(`resize.${this.ns}`, null)
   }
+
   render() {
     const { size } = this.state
-    const { component, children } = this.props
-    return React.createElement(component, null, size && (
+    const { children } = this.props
+    const childProps = size && { size, width: size[0], height: size[1] }
+    return size == null ? <span /> :
       typeof children === 'function'
-        ? children({ size, width: size[0], height: size[1] })
-        : Children.map(children, child => cloneElement(child, { size, width: size[0], height: size[1] }))
-    ))
+        ? children(childProps)
+        : cloneElement(Children.only(children), childProps)
   }
 }
 
 Sizeable.propTypes = {
-  width: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-  height: PropTypes.oneOfType([PropTypes.bool, PropTypes.func]),
-  component: React.PropTypes.any,
+  width: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
+  height: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
 }
 
 Sizeable.defaultProps = {
   width: true,
   height: false,
-  component: 'div',
 }
 
 export default Sizeable
