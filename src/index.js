@@ -1,8 +1,20 @@
-import React, { Component, Children, cloneElement, PropTypes } from 'react'
+import { Component, Children, createElement, cloneElement, PropTypes } from 'react'
 import { findDOMNode } from 'react-dom'
 import { select } from "d3-selection"
 
-class Sizeable extends Component {
+export default class extends Component {
+  
+  static propTypes = {
+    width: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
+    height: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
+    component: PropTypes.any,
+  }
+
+  static defaultProps = {
+    width: true,
+    height: false,
+  }
+
   constructor(props) {
     super(props)
     this.state = { size: null }
@@ -42,23 +54,22 @@ class Sizeable extends Component {
 
   render() {
     const { size } = this.state
-    const { children } = this.props
+    const { children, component } = this.props
+
     const childProps = size && { size, width: size[0], height: size[1] }
-    return size == null ? <span /> :
-      typeof children === 'function'
-        ? children(childProps)
-        : cloneElement(Children.only(children), childProps)
+
+    return (
+      component != null
+        ? createElement(component, null, size && (
+            typeof children === 'function'
+              ? children(childProps)
+              : Children.map(child => cloneElement(child, childProps))
+          ))
+        : size == null
+          ? createElement('span')
+          : typeof children === 'function'
+              ? children(childProps)
+              : cloneElement(Children.only(children), childProps)
+    )
   }
 }
-
-Sizeable.propTypes = {
-  width: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
-  height: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
-}
-
-Sizeable.defaultProps = {
-  width: true,
-  height: false,
-}
-
-export default Sizeable
