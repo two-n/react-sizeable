@@ -2,6 +2,8 @@ import { Component, Children, createElement, cloneElement, PropTypes } from 'rea
 import { findDOMNode } from 'react-dom'
 import { select } from "d3-selection"
 
+const representSize = size => size && { size, width: size[0], height: size[1] }
+
 export default class extends Component {
   
   static propTypes = {
@@ -23,25 +25,26 @@ export default class extends Component {
   setSize() {
     const { width, height } = this.props,
           node = findDOMNode(this)
-    this.setState({
-      size: [
-        typeof width === 'function' ? width(node) :
-          typeof width === 'number' ? width :
-          width ? node.parentNode.offsetWidth : null,
-        typeof height === 'function' ? height(node) :
-          typeof height === 'number' ? height :
-          height ? node.parentNode.offsetHeight : null,
-      ]
-    })
+
+    const size = [
+      typeof width === 'function' ? width(node) :
+        typeof width === 'number' ? width :
+        width ? node.parentNode.offsetWidth : null,
+      typeof height === 'function' ? height(node) :
+        typeof height === 'number' ? height :
+        height ? node.parentNode.offsetHeight : null,
+    ]
+    if (
+      this.state.size == null ||
+      this.shouldResize(representSize(this.state.size), representSize(size))
+    ) {
+      this.setState({ size })
+    }
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return (
-      this.props !== nextProps ||
-      this.state.size == null || nextState.size == null ||
-      this.state.size[0] !== nextState.size[0] ||
-      this.state.size[1] !== nextState.size[1]
-    )
+  shouldResize(previous, current) {
+    return (this.props.width && current.width !== previous.width) ||
+           (this.props.height && current.height !== previous.height)
   }
 
   componentDidMount() {
@@ -52,24 +55,30 @@ export default class extends Component {
     select(window).on(`resize.${this.ns}`, null)
   }
 
+  extraProps() {
+    const props = { ...this.props }
+    delete props.children
+    delete props.component
+    delete props.width
+    delete props.height
+    return props
+  }
+
   render() {
     const { size } = this.state
     const { children, component } = this.props
-
-    const childProps = size && { size, width: size[0], height: size[1] }
-
     return (
       component != null
-        ? createElement(component, null, size && (
+        ? createElement(component, this.extraProps(), size && (
             typeof children === 'function'
-              ? children(childProps)
-              : Children.map(child => cloneElement(child, childProps))
+              ? children(representSize(size))
+              : Children.map(child => cloneElement(child, representSize(size)))
           ))
         : size == null
           ? createElement('span')
           : typeof children === 'function'
-              ? children(childProps)
-              : cloneElement(Children.only(children), childProps)
+              ? children(representSize(size))
+              : cloneElement(Children.only(children), representSize(size))
     )
   }
 }
