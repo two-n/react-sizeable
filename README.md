@@ -1,6 +1,6 @@
 # Sizeable
 
-Component that passes the computed size of its parent (i.e. width only, by default) down to its children. Assumes block-rendered contents, and that sizing depends on window size only.
+Component that passes the computed size of its parent (i.e. width only, by default) down to its children. Assumes block-rendered contents, and that sizing depends on window size only. `npm install react-sizeable`
 
 ```jsx
 import Sizeable from 'react-sizeable'
@@ -36,7 +36,7 @@ A `component` prop can also be specified (e.g. `"div"` or any React component), 
 
 For added flexibility, the component can be extended with a condition for whether or not to resize. For instance, to only update the size if the height changes:
 
-```
+```jsx
 class HeightTriggeredSizeable extends Sizeable {
   shouldResize(previous, current) {
     return current.height !== previous.height
