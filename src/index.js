@@ -4,7 +4,7 @@ import { select } from "d3-selection"
 
 const representSize = size => size && { size, width: size[0], height: size[1] }
 
-export default class extends Component {
+export default class Sizeable extends Component {
   
   static propTypes = {
     width: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
