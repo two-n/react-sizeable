@@ -34,10 +34,10 @@ export default class Sizeable extends Component {
         typeof height === 'number' ? height :
         height ? node.parentNode.offsetHeight : null,
     ]
-    if (
-      this.state.size == null ||
-      this.shouldResize(representSize(this.state.size), representSize(size))
-    ) {
+    if (this.state.size == null) {
+      this.setState({ size })
+    }
+    else if (this.shouldResize(representSize(this.state.size), representSize(size))) {
       this.setState({ size })
     }
   }

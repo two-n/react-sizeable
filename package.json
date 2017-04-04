@@ -1,6 +1,6 @@
 {
   "name": "react-sizeable",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Component that passes the computed size of its parent through to its children",
   "main": "./dist/index.js",
   "scripts": {
