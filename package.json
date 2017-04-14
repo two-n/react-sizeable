@@ -17,7 +17,7 @@
   "homepage": "https://github.com/two-n/react-sizeable",
   "bugs": "https://github.com/two-n/react-sizeable/issues",
   "dependencies": {
-    "d3-selection": "1",
+    "prop-types": "^15",
     "react": "15",
     "react-dom": "15"
   },

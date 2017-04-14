@@ -1,6 +1,6 @@
-import { Component, Children, createElement, cloneElement, PropTypes } from 'react'
+import { Component, Children, createElement, cloneElement } from 'react'
 import { findDOMNode } from 'react-dom'
-import { select } from "d3-selection"
+import PropTypes from 'prop-types'
 
 const representSize = size => size && { size, width: size[0], height: size[1] }
 
@@ -17,16 +17,19 @@ export default class Sizeable extends Component {
     height: false,
   }
 
+  state = { size: null }
+
   constructor(props) {
     super(props)
-    this.state = { size: null }
+    this.setSize = this.setSize.bind(this)
   }
 
   setSize() {
     const { width, height } = this.props,
+          { size } = this.state,
           node = findDOMNode(this)
 
-    const size = [
+    const newSize = [
       typeof width === 'function' ? width(node) :
         typeof width === 'number' ? width :
         width ? node.parentNode.offsetWidth : null,
@@ -34,11 +37,13 @@ export default class Sizeable extends Component {
         typeof height === 'number' ? height :
         height ? node.parentNode.offsetHeight : null,
     ]
-    if (this.state.size == null) {
-      this.setState({ size })
+
+    if (size == null) {
+      this.setState({ size: newSize })
     }
-    else if (this.shouldResize(representSize(this.state.size), representSize(size))) {
-      this.setState({ size })
+    else if (this.shouldResize(representSize(size), representSize(newSize))) {
+      // Redundancy to work around Edge greedily evaluating operands
+      this.setState({ size: newSize })
     }
   }
 
@@ -49,10 +54,10 @@ export default class Sizeable extends Component {
 
   componentDidMount() {
     this.setSize()
-    select(window).on(`resize.${this.ns = Math.random()}`, this.setSize.bind(this))
+    window.addEventListener('resize', this.setSize)
   }
   componentWillUnmount() {
-    select(window).on(`resize.${this.ns}`, null)
+    window.removeEventListener('resize', this.setSize)
   }
 
   extraProps() {
@@ -67,6 +72,7 @@ export default class Sizeable extends Component {
   render() {
     const { size } = this.state
     const { children, component } = this.props
+
     return (
       component != null
         ? createElement(component, this.extraProps(), size && (
