@@ -2,13 +2,15 @@ import { Component, Children, createElement, cloneElement } from 'react'
 import { findDOMNode } from 'react-dom'
 import PropTypes from 'prop-types'
 
-const representSize = size => size && { size, width: size[0], height: size[1] }
-
 export default class Sizeable extends Component {
   
   static propTypes = {
-    width: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
-    height: PropTypes.oneOfType([PropTypes.bool, PropTypes.number, PropTypes.func]),
+    width: PropTypes.oneOfType([
+      PropTypes.bool, PropTypes.number, PropTypes.func
+    ]),
+    height: PropTypes.oneOfType([
+      PropTypes.bool, PropTypes.number, PropTypes.func
+    ]),
     component: PropTypes.any,
   }
 
@@ -22,6 +24,17 @@ export default class Sizeable extends Component {
   constructor(props) {
     super(props)
     this.setSize = this.setSize.bind(this)
+  }
+
+  representSize(size) {
+    const { width, height } = this.props
+    if (size == null) return size
+
+    const sizeProps = {}
+    if (width) sizeProps.width = size[0]
+    if (height) sizeProps.height = size[1]
+    if (width && height) sizeProps.size = size
+    return sizeProps
   }
 
   setSize() {
@@ -41,7 +54,7 @@ export default class Sizeable extends Component {
     if (size == null) {
       this.setState({ size: newSize })
     }
-    else if (this.shouldResize(representSize(size), representSize(newSize))) {
+    else if (this.shouldResize(this.representSize(size), this.representSize(newSize))) {
       // Redundancy to work around Edge greedily evaluating operands
       this.setState({ size: newSize })
     }
@@ -77,14 +90,14 @@ export default class Sizeable extends Component {
       component != null
         ? createElement(component, this.extraProps(), size && (
             typeof children === 'function'
-              ? children(representSize(size))
-              : Children.map(child => cloneElement(child, representSize(size)))
+              ? children(this.representSize(size))
+              : Children.map(child => cloneElement(child, this.representSize(size)))
           ))
         : size == null
           ? createElement('span')
           : typeof children === 'function'
-              ? children(representSize(size))
-              : cloneElement(Children.only(children), representSize(size))
+              ? children(this.representSize(size))
+              : cloneElement(Children.only(children), this.representSize(size))
     )
   }
 }

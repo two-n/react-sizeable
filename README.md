@@ -12,7 +12,9 @@ import Sizeable from 'react-sizeable'
 </Sizeable>
 ```
 
-`<MyComponent>` element will receive `width` as a prop, as well as `height` if enabled. (Also, `size`: `[width, height]`.) Alternative usage:
+`<MyComponent>` element will receive `width` as a prop (unless disabled), as well as `height` (if enabled) and `size`: `[width, height]` (if both enabled).
+
+Alternative usage:
 
 ```jsx
 <Sizeable>{({ width }) =>
